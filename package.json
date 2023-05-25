@@ -1,0 +1,50 @@
+{
+  "name": "xiv-mjigrabmeta-node",
+  "version": "1.0.0",
+  "description": "Adds comments to ReSanctuary's settings file to sort the ToDo widget.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint -c eslint.config.mjs .",
+    "build": "echo \"Warning: No build needed.\" && exit 0",
+    "start": "node index.js",
+    "query": "pnpm start"
+  },
+  "keywords": [
+    "ffxiv",
+    "mji",
+    "xivapi",
+    "island sanctuary",
+    "fetch"
+  ],
+  "author": {
+    "name": "Neko Boi Nick",
+    "email": "950594+thakyZ@users.noreply.github.com",
+    "url": "https://github.com/thakyZ"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thakyZ/xiv-mjigrabmeta-node/issues"
+  },
+  "homepage": "https://github.com/thakyZ/xiv-mjigrabmeta-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thakyZ/iv-mjigrabmeta-node.git"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "dependencies": {
+    "@xivapi/js": "^0.4.1"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^8.40.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.40.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "globals": "^13.20.0",
+    "prettier": "^2.8.8"
+  }
+}

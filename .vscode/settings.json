@@ -1,0 +1,25 @@
+{
+  "cSpell.words": [
+    "autofixer",
+    "backreference",
+    "camelcase",
+    "doesn",
+    "doesn't",
+    "freelist",
+    "iife",
+    "imprt",
+    "Islewort",
+    "linebreak",
+    "mjigrabmeta",
+    "nonconstructor",
+    "nonoctal",
+    "smalloc",
+    "xivapi"
+  ],
+  "eslint.enable": true,
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "eslint.experimental.useFlatConfig": true,
+  "eslint.lintTask.options": "-c ${workspace}/eslint.config.mjs --ignore-path ${workspace}/.eslintignore .",
+  "eslint.options": { "overrideConfigFile": "eslint.config.mjs" }
+}
