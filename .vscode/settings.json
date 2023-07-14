@@ -13,7 +13,9 @@
     "mjigrabmeta",
     "nonconstructor",
     "nonoctal",
+    "readlines",
     "smalloc",
+    "todolist",
     "xivapi"
   ],
   "eslint.enable": true,

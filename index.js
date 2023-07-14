@@ -5,12 +5,8 @@ import path from "path";
 import XivApi from "@xivapi/js";
 import * as readline from "node:readline/promises";
 import { EOL } from "os";
-/* - Possibly going to be unused code.
- * import cliProgress from "cli-progress";
- */
-/* - Possibly going to be unused code.
- * import stripJsonComments from "strip-json-comments";
- */
+import cliProgress from "cli-progress";
+import stripJsonComments from "strip-json-comments";
 import util from "util";
 const xiv = new XivApi();
 
@@ -21,17 +17,15 @@ const __config = path.join(__dirname, "config.json");
 const __inputFile = path.join(__dirname, "ReSanctuary.json");
 
 const __outputFile = path.join(__dirname, "ReSanctuary_out.json");
-/* - Possibly going to be unused code.
- * const bar = new cliProgress.SingleBar(
- *   {
- *     hideCursor: true,
- *     format:
- *       "[{bar}] {percentage}% | Duration: {duration_formatted} | ETA: {eta_formatted} | {value}/{total}",
- *     formatTime: cliProgress.formatTime,
- *   },
- *   cliProgress.Presets.shades_classic,
- * );
- */
+
+const bar = new cliProgress.SingleBar({
+    hideCursor: true,
+    format: "[{bar}] {percentage}% | Duration: {duration_formatted} | ETA: {eta_formatted} | {value}/{total}",
+    formatTime: cliProgress.formatTime,
+  },
+  cliProgress.Presets.shades_classic,
+);
+
 let out;
 let apiKey;
 
@@ -65,17 +59,13 @@ async function runGetData(content, id) {
  */
 async function find(resolution) {
   const results = [];
-  /* - Possibly going to be unused code.
-   * bar.start(res.Pagination.ResultsTotal, 0, {
-   *   speed: "N/A",
-   * });
-   */
+  bar.start(res.Pagination.ResultsTotal, 0, {
+    speed: "N/A",
+  });
 
   for (let i = 0; i <= resolution.Pagination.ResultsTotal; i++) {
     let result = await runGetData("MJIItemPouch", i.toString())
-    /* - Possibly going to be unused code.
-     * bar.update(i);
-     */
+    bar.update(i);
     results.push(result);
   }
 
@@ -83,18 +73,14 @@ async function find(resolution) {
     console.log(result);
 
     try {
-      /* - Possibly going to be unused code.
-       * bar.update(i);
-       */
+      bar.update(i);
       results.push({ id: result.ID, singular: result.Item[`Name${lang[__config.lang]}`] });
     } catch (error) {
       console.error({ message: error.message, stack: error.stack });
     }
   }
 
-  /* - Possibly going to be unused code.
-   * bar.stop();
-   */
+  bar.stop();
   return results;
 }
 

@@ -2,11 +2,12 @@ import globals from "globals";
 import eslintJs from "@eslint/js";
 import eslintPrettier from "eslint-config-prettier";
 import prettier from "eslint-plugin-prettier";
+import functional from "eslint-plugin-functional";
 import imprt from "eslint-plugin-import";
+import ts from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
 
 export default [
-  eslintJs.configs["recommended"],
-  eslintPrettier,
   {
     files: ["eslint.config.mjs"],
     languageOptions: {
@@ -22,21 +23,24 @@ export default [
     plugins: {
       prettier,
       import: imprt,
+      functional,
     },
     rules: {
+      ...eslintJs.configs["recommended"].rules,
       ...eslintPrettier.rules,
-      "prettier/prettier": "warning",
+      "prettier/prettier": "warn",
       camelcase: "off",
       "object-curly-spacing": "off",
     },
   },
   {
-    files: ["**/*.js"],
+    files: ["**/*.ts"],
     languageOptions: {
+      parser: tsParser,
       parserOptions: {
         ecmaFeatures: { modules: true },
         ecmaVersion: "latest",
-        sourceType: "module",
+        project: "./tsconfig.json",
       },
       globals: {
         console: "readonly",
@@ -47,14 +51,19 @@ export default [
     },
     plugins: {
       prettier,
+      ts,
+      "@typescript-eslint": ts,
       import: imprt,
+      functional,
     },
     linterOptions: {
       reportUnusedDisableDirectives: true,
     },
     rules: {
+      ...eslintJs.configs["recommended"].rules,
+      ...ts.configs["recommended-requiring-type-checking"].rules,
       ...eslintPrettier.rules,
-      "prettier/prettier": "warning",
+      "prettier/prettier": "warn",
       "comma-dangle": "off",
       "for-direction": "error",
       "getter-return": "error",
@@ -544,6 +553,7 @@ export default [
       "symbol-description": "error",
       "template-curly-spacing": "error",
       "yield-star-spacing": ["error", "both"],
+      "ts/return-await": 2,
     },
   },
 ];
