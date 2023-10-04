@@ -1,13 +1,17 @@
 import globals from "globals";
 import eslintJs from "@eslint/js";
-import eslintPrettier from "eslint-config-prettier";
-import prettier from "eslint-plugin-prettier";
+import prettier from "eslint-config-prettier";
+import prettierPlugin from "eslint-plugin-prettier";
 import functional from "eslint-plugin-functional";
 import imprt from "eslint-plugin-import";
 import ts from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
+import markdown from "eslint-plugin-markdown";
 
 export default [
+  {
+    ignores: ["dist/**/*"]
+  },
   {
     files: ["eslint.config.mjs"],
     languageOptions: {
@@ -21,24 +25,35 @@ export default [
       },
     },
     plugins: {
-      prettier,
+      prettierPlugin,
       import: imprt,
       functional,
     },
     rules: {
-      ...eslintJs.configs["recommended"].rules,
-      ...eslintPrettier.rules,
-      "prettier/prettier": "warn",
+      ...prettier.rules,
       camelcase: "off",
       "object-curly-spacing": "off",
     },
+  },
+  {
+    files: ["**/*.md"],
+    plugins: {
+        markdown
+    },
+    processor: "markdown/markdown",
+    settings: {
+        sharedData: "Hello"
+    }
   },
   {
     files: ["**/*.ts"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        ecmaFeatures: { modules: true },
+        ecmaVersion: 2020,
+        sourceType: "module",
+        ecmaFeatures: { modules: true,
+          experimentalObjectRestSpread: true },
         ecmaVersion: "latest",
         project: "./tsconfig.json",
       },
@@ -46,11 +61,10 @@ export default [
         console: "readonly",
         process: "readonly",
         ...globals.node,
-        ...globals.browser,
       },
     },
     plugins: {
-      prettier,
+      prettierPlugin,
       ts,
       "@typescript-eslint": ts,
       import: imprt,
@@ -62,8 +76,7 @@ export default [
     rules: {
       ...eslintJs.configs["recommended"].rules,
       ...ts.configs["recommended-requiring-type-checking"].rules,
-      ...eslintPrettier.rules,
-      "prettier/prettier": "warn",
+      ...prettier.rules,
       "comma-dangle": "off",
       "for-direction": "error",
       "getter-return": "error",
@@ -223,7 +236,7 @@ export default [
       "no-warning-comments": "warn",
       "no-with": "error",
 
-      // Disabled for now as Firefox doesn"t support named capture groups and I"m tired of getting issues about the use of named capture groups...
+      // Disabled for now as Firefox doesn't support named capture groups and I"m tired of getting issues about the use of named capture groups...
       // "prefer-named-capture-group": "error"
 
       "prefer-promise-reject-errors": [
@@ -243,7 +256,7 @@ export default [
       // Disabled for now as it causes too much churn
       // TODO: Enable it in the future when I have time to deal with
       // the churn and the rule is stable and has an autofixer.
-      // Still doesn"t have a fixer as of ESLint 7.24.0.
+      // Still doesn't have a fixer as of ESLint 7.24.0.
       // "require-unicode-regexp": "error",
 
       "wrap-iife": [
@@ -301,6 +314,7 @@ export default [
         "error",
         {
           properties: "always",
+          ignoreGlobals: true,
         },
       ],
       "capitalized-comments": [
@@ -309,7 +323,9 @@ export default [
         {
           // You can also ignore this rule by wrapping the first word in quotes.
           // c8 => https://github.com/bcoe/c8
-          ignorePattern: /pragma|ignore|prettier-ignore|webpack\w+:|c8|type-coverage:/.source,
+          ignorePattern:
+            /pragma|ignore|prettier-ignore|webpack\w+:|c8|type-coverage:/
+              .source,
           ignoreInlineComments: true,
           ignoreConsecutiveComments: true,
         },
@@ -339,7 +355,7 @@ export default [
       ],
       "func-names": ["error", "never"],
       "function-call-argument-newline": ["error", "consistent"],
-      indent: ["error", 2],
+      indent: ["error", 2, { "SwitchCase": 1 } ],
       "jsx-quotes": ["error", "prefer-double"],
       "key-spacing": [
         "error",
@@ -475,7 +491,7 @@ export default [
       "template-tag-spacing": ["error", "never"],
       "unicode-bom": ["error", "never"],
       "arrow-body-style": "error",
-      "arrow-parens": ["error", "as-needed"],
+      "arrow-parens": ["error", "always"],
       "arrow-spacing": [
         "error",
         {
@@ -511,6 +527,7 @@ export default [
         "error",
         {
           allowNamedFunctions: true,
+          allowUnboundThis: true,
         },
       ],
       "prefer-const": [
@@ -542,10 +559,7 @@ export default [
         },
       ],
       "prefer-numeric-literals": "error",
-
-      // TODO: Enable when targeting Node.js 16.
-      // "prefer-object-has-own": "error",
-
+      "prefer-object-has-own": "error",
       "prefer-rest-params": "error",
       "prefer-spread": "error",
       "require-yield": "error",
@@ -553,7 +567,6 @@ export default [
       "symbol-description": "error",
       "template-curly-spacing": "error",
       "yield-star-spacing": ["error", "both"],
-      "ts/return-await": 2,
     },
   },
 ];

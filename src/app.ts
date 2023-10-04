@@ -3,13 +3,15 @@ import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import path from "node:path";
 import * as readline from "node:readline/promises";
+/* Unused
 import util from "node:util";
+*/
 import cliProgress from "cli-progress";
-import { Config, MJIItemPouchEntry, XIVAPIResolution, DataOutput, XIVAPIResult, ReSanctuaryFile } from "./types";
+import "./types/Internal";
+import { Config, DataOutput, ModuleResult, ReSanctuaryFile, Item } from "./types/Internal";
 // TODO: const stripJsonComments = require("strip-json-comments");
-/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */
-const XivApi: any = require("@xivapi/js");
-let xiv: any | undefined;
+import { XivApi, MJIItemPouchEntry, Resolution, ConstructorProperties } from "@xivapi/js";
+let xiv: XivApi | undefined;
 
 const __config: string = path.join(__dirname, "config.json");
 
@@ -32,8 +34,8 @@ const bar: cliProgress.SingleBar = new cliProgress.SingleBar(
 let apiKey: string;
 
 function sleep(ms: number) {
-  return new Promise(r => {
-    setTimeout(r, ms);
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
   });
 }
 
@@ -42,10 +44,9 @@ const lang: { [key: string]: string } = { default: "", de: "_de", en: "_en", fr:
 async function runGetData(content: string, id: number): Promise<MJIItemPouchEntry> {
   let data: MJIItemPouchEntry;
   try {
-    /* eslint-disable-next-line @typescript-eslint/no-unsafe-call @typescript-eslint/no-unsafe-assignment */
     data = await xiv.data.get(content, id.toString());
   } catch (error) {
-    console.error({ message: error.message, stack: error.stack });
+    console.error(error);
   }
 
   await sleep(2000);
@@ -60,30 +61,39 @@ async function runGetData(content: string, id: number): Promise<MJIItemPouchEntr
  *   }
  * ]
  */
-async function find(resolution: XIVAPIResolution): Promise<DataOutput[]> {
+async function find(resolution: Resolution): Promise<DataOutput[]> {
   const results: DataOutput[] = [];
-  const xivResults: MJIItemPouchEntry[] = [];
   bar.start(resolution.Pagination.ResultsTotal, 0, {
     speed: "N/A",
   });
 
-  for (let i: number = 0; i <= resolution.Pagination.ResultsTotal; i++) {
-    const result: MJIItemPouchEntry = await runGetData("MJIItemPouch", i);
-    bar.update(i);
-    xivResults.push(result);
-  }
+  const getEntry = async (index: number): Promise<MJIItemPouchEntry> => {
+    const result: MJIItemPouchEntry = await runGetData("MJIItemPouch", index);
+    bar.update(index);
+    return result;
+  };
+
+  const getEntries = async (total: number): Promise<MJIItemPouchEntry[]> => {
+    const promises: Promise<MJIItemPouchEntry>[] = [];
+
+    for (let index: number = 0; index <= total; index++) {
+      promises.push(getEntry(index));
+    }
+
+    const output: Promise<MJIItemPouchEntry[]> = Promise.all(promises);
+    return output;
+  };
+
+  const xivResults: MJIItemPouchEntry[] = await getEntries(resolution.Pagination.ResultsTotal);
 
   for (let i: number = 0; i <= xivResults.length; i++) {
     console.log(results[i]);
 
     try {
       bar.update(i);
-      results.push({
-        id: xivResults[i].ID,
-        singular: xivResults[i].Item[`Name${lang[config.lang]}`].toString(),
-      });
+      results.push(new ModuleResult(xivResults[i].ID, (xivResults[i].Item as Item).getName(lang[config.lang])));
     } catch (error) {
-      console.error({ message: error.message, stack: error.stack });
+      console.error(error);
     }
   }
 
@@ -92,13 +102,13 @@ async function find(resolution: XIVAPIResolution): Promise<DataOutput[]> {
 }
 
 async function getString(): Promise<DataOutput[]> {
-  let resolution: XIVAPIResolution;
+  let resolution: Resolution;
   let resolution2: DataOutput[];
 
   try {
     resolution = await xiv.data.list("MJIItemPouch");
   } catch (error) {
-    console.error({ message: error.message, stack: error.stack });
+    console.error(error);
   }
 
   if (resolution.Pagination.ResultsTotal > 0) {
@@ -108,6 +118,7 @@ async function getString(): Promise<DataOutput[]> {
   return resolution2;
 }
 
+/* Unused
 function displayJson(json: XIVAPIResult) {
   if (json.Url) {
     json.Url = `https://xivapi.com${json.Url}`;
@@ -115,6 +126,7 @@ function displayJson(json: XIVAPIResult) {
 
   console.log(util.inspect(json, { showHidden: false, depth: null, colors: true }));
 }
+*/
 
 async function calcLineLengths(): Promise<{ [key: string]: number }> {
   const inputStream = fsSync.createReadStream(__inputFile);
@@ -129,7 +141,7 @@ async function calcLineLengths(): Promise<{ [key: string]: number }> {
 
   let foundTodoList = 0;
   let i = 1;
-  const regexp = new RegExp('"(d{1,4})": d+,?');
+  const regexp = /"(d{1,4})": d+,?/;
   for await (const line of readlines) {
     let outputLength: number;
     if (foundTodoList === 0 && line.toLowerCase().includes("todolist")) {
@@ -146,7 +158,7 @@ async function calcLineLengths(): Promise<{ [key: string]: number }> {
       }
     }
 
-    console.log(`Line from file: "${outputLength}".length === ${length}`);
+    console.log(`Line from file: "${line}".length === ${outputLength}`);
     // Each line in input.txt will be successively available here as `line`.
     i++;
   }
@@ -196,7 +208,7 @@ async function parseInputFile(input: ReSanctuaryFile, data: DataOutput[]) {
 
   let foundTodoList = 0;
   let i = 1;
-  const regexp = new RegExp('"(d{1,4})": d+,?');
+  const regexp = /"(d{1,4})": d+,?/;
   for await (const line of readlines) {
     const inputLine = line;
     let outputLine = "";
@@ -213,11 +225,11 @@ async function parseInputFile(input: ReSanctuaryFile, data: DataOutput[]) {
     if (foundTodoList !== 0) {
       if (line.toLowerCase().includes("},")) {
         foundTodoList = -1;
-      } else if (new RegExp('"d{1,4}": d+,?').test(line)) {
+      } else if (/"d{1,4}": d+,?/.test(line)) {
         outputLine = transformLine(
           line,
           lineLengths,
-          data.find(x => x.id.toString() === matched[1]).singular,
+          data.find((x) => x.id.toString() === matched[1]).singular,
         );
         readlines.write(outputLine);
         console.log(`Line from file: ${inputLine} => ${outputLine}`);
@@ -239,30 +251,45 @@ async function parseInputFile(input: ReSanctuaryFile, data: DataOutput[]) {
 
   try {
     const _config: string = await fs.readFile(__config, { encoding: "utf-8" });
-    config = JSON.parse(_config);
+    config = new Config(JSON.parse(_config));
   } catch (error) {
-    console.error({ message: error.message, stack: error.stack });
+    console.error(error);
   }
 
   // - Possibly going to be unused code.
   // config = JSON.parse(stripJsonComments(config));
   const _out: string = path.join(__dirname, config.output);
   apiKey = config.credentials.apiKey;
-  const tempData = {
+  const tempData: ConstructorProperties = {
     language: config.lang,
+    /* eslint-disable-next-line camelcase */
     snake_case: true,
+    /* eslint-disable-next-line camelcase */
+    private_key: undefined
   };
   if (apiKey !== "" && apiKey !== undefined) {
-    tempData["private_key"] = apiKey;
+    /* eslint-disable-next-line camelcase */
+    tempData.private_key = apiKey;
+  }
+
+  if (typeof tempData.private_key === "undefined") {
+    delete tempData.private_key;
   }
 
   xiv = new XivApi(tempData);
-  let gotten_json: { [key: string]: DataOutput[] } = {};
-  let input_json: ReSanctuaryFile;
-  let stringed_gotten_json: string;
+  let gottenJson: { [key: string]: DataOutput[] } = {};
+  let inputJson: ReSanctuaryFile;
+  let stringedGottenJson: string;
 
-  if (!fsExists(_out)) {
-    let gotten = [];
+  if (fsExists(_out)) {
+    try {
+      const dataFile: string = await fs.readFile(_out, { encoding: "utf-8", flag: "r+" });
+      gottenJson = (JSON.parse(dataFile) as { [key: string]: DataOutput[] });
+    } catch (error) {
+      console.error(error);
+    }
+  } else {
+    let gotten: DataOutput[] = [];
     try {
       gotten = await getString();
     } catch (error) {
@@ -270,38 +297,31 @@ async function parseInputFile(input: ReSanctuaryFile, data: DataOutput[]) {
     }
 
     try {
-      gotten_json = { data: gotten };
-      stringed_gotten_json = JSON.stringify(gotten_json, null, 2);
+      gottenJson = { data: gotten };
+      stringedGottenJson = JSON.stringify(gottenJson, null, 2);
     } catch (error) {
       console.error(error);
     }
 
     try {
-      await fs.writeFile(_out, stringed_gotten_json, { encoding: "utf-8", flag: "w", mode: 0o666 });
-    } catch (error) {
-      console.error(error);
-    }
-  } else {
-    try {
-      const dataFile: string = await fs.readFile(_out, { encoding: "utf-8", flag: "r+" });
-      gotten_json = JSON.parse(dataFile);
+      await fs.writeFile(_out, stringedGottenJson, { encoding: "utf-8", flag: "w", mode: 0o666 });
     } catch (error) {
       console.error(error);
     }
   }
 
-  if (!fsExists(__inputFile)) {
-    console.error(new Error(`Input file does not exist at: ${__inputFile}!`));
-  } else {
+  if (fsExists(__inputFile)) {
     try {
       const inputFile: string = await fs.readFile(__inputFile, { encoding: "utf-8", flag: "r+" });
-      input_json = JSON.parse(inputFile);
+      inputJson = (JSON.parse(inputFile) as ReSanctuaryFile);
     } catch (error) {
       console.error(error);
     }
-
-
+  } else {
+    console.error(new Error(`Input file does not exist at: ${__inputFile}!`));
   }
 
-  await parseInputFile(input_json, gotten_json.data);
-})();
+  await parseInputFile(inputJson, gottenJson.data);
+})().catch((reason) => {
+  console.error(reason);
+});

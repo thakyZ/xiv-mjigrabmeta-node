@@ -5,8 +5,9 @@
     "module": "esnext",
     "sourceMap": true,
     "forceConsistentCasingInFileNames": false,
-    "outDir": "dist"
+    "outDir": "dist",
+    "lib": ["es2022"],
+    "types": ["node"]
   },
-  "lib": ["es2022"],
-  "types": ["node"]
+  "exclude": ["node_modules", ".vscode"]
 }
