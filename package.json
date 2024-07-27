@@ -33,37 +33,29 @@
     "url": "https://github.com/thakyZ/iv-mjigrabmeta-node.git"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=20"
   },
   "dependencies": {
-    "@xivapi/js": "^0.4.2",
+    "@xivapi/js": "^0.4.5",
     "cli-progress": "^3.12.0",
     "strip-json-comments": "^5.0.1"
   },
   "devDependencies": {
-    "@eslint/js": "^8.44.0",
-    "@types/cli-progress": "^3.11.0",
-    "@types/node": "^20.4.2",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
+    "@eslint-community/eslint-utils": "^4.4.0",
+    "@eslint/js": "^9.8.0",
+    "@types/cli-progress": "^3.11.6",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^20.14.12",
     "cross-env": "^7.0.3",
-    "eslint": "^8.44.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-functional": "^5.0.8",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-markdown": "^3.0.0",
-    "eslint-plugin-prettier": "^5.0.0",
-    "globals": "^13.20.0",
-    "hint": "^7.1.10",
+    "eslint": "^9.8.0",
+    "eslint-plugin-functional": "^6.6.3",
+    "eslint-plugin-markdown": "^5.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.8.0",
+    "hint": "^7.1.12",
     "nodejs-fs-utils": "^1.2.6",
-    "prettier": "^3.0.0",
-    "prettier-eslint": "^15.0.1",
-    "typescript": "5.1.6"
-  },
-  "pnpm": {
-    "overrides": {
-      "got@<11.8.5": ">=11.8.5",
-      "semver@>=6.0.0 <6.3.1": ">=6.3.1"
-    }
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.0.0-alpha.54"
   }
 }
